@@ -600,7 +600,7 @@ body {
     <div class="logo">3ZeBra Tools</div>
     <h1>廣告素材受眾分析器</h1>
     <p>貼上 Gemini 分析報告，自動產出 Meta 受眾建議</p>
-    <div class="version-badge">v2.0 — 真實 Meta 興趣 ID + 歷史 ROAS 數據</div>
+    <div class="version-badge">v2.1 — 真實 Meta 興趣 ID + 近三年歷史 ROAS 數據</div>
   </div>
 
   <div class="steps-bar">
@@ -633,7 +633,7 @@ body {
       1. 把廣告影片丟到 Gemini 的「廣告素材影片分析器」Gem<br>
       2. 複製 Gem 產出的完整分析報告<br>
       3. 貼到上方文字框，按「分析受眾」<br><br>
-      <strong>v2.0 新功能：</strong>興趣標籤使用真實 Meta Marketing API ID，預算/CPA 建議來自 3ZeBra 近一年實際投放數據
+      <strong>v2.1 新功能：</strong>興趣標籤使用真實 Meta Marketing API ID，預算/CPA 建議來自 3ZeBra 近三年實際投放數據（NT$13,663,153 花費 / 15,809 筆轉換）
     </div>
     <div class="error-msg" id="errorMsg"></div>
   </div>
@@ -645,7 +645,7 @@ body {
 
   <div class="results" id="results"></div>
 
-  <div class="footer">3ZeBra 內部工具 v2.0 &middot; 數據更新至 2026/04 &middot; 受眾建議僅供參考</div>
+  <div class="footer">3ZeBra 內部工具 v2.1 &middot; 數據範圍 2023/04-2026/04（近三年） &middot; 受眾建議僅供參考</div>
 </div>
 
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
@@ -722,40 +722,46 @@ const META_INTERESTS = {
   "天然護膚":   { id:"6003875393160", name:"天然護膚", size:117297252, cat:"美容_護膚" },
 };
 
-// ===== 3ZeBra HISTORICAL PERFORMANCE DATA (past 12 months, filtered: no DPA/DABA/RT/ASC) =====
+// ===== 3ZeBra HISTORICAL PERFORMANCE DATA (past 3 years, filtered: no DPA/DABA/RT/ASC/LL) =====
 // Aggregated by interest category keyword, sorted by ROAS
 const HISTORICAL_PERF = {
-  // High performers (ROAS > 5)
-  "SPA_35+":       { roas:6.58, cpa:401, spend:60620, purchases:151, label:"SPA（35+女性）" },
-  "物理治療":      { roas:6.50, cpa:447, spend:62525, purchases:140, label:"物理治療師受眾" },
-  "上班族":        { roas:6.50, cpa:488, spend:7810, purchases:16, label:"上班族" },
-  "優惠":          { roas:7.70, cpa:450, spend:7202, purchases:16, label:"優惠導向" },
-  "登山":          { roas:7.02, cpa:464, spend:3251, purchases:7, label:"登山族群" },
-  "家人":          { roas:6.31, cpa:498, spend:4483, purchases:9, label:"家人/家庭" },
-  // Good performers (ROAS 3~5)
-  "廚房":          { roas:5.11, cpa:545, spend:19606, purchases:36, label:"廚房/家務" },
-  "生理用品":      { roas:4.94, cpa:728, spend:7283, purchases:10, label:"生理用品（女性）" },
-  "肩頸":          { roas:4.47, cpa:685, spend:10282, purchases:15, label:"肩頸痠痛" },
-  "運動":          { roas:4.12, cpa:944, spend:24541, purchases:26, label:"運動族群" },
-  "零售":          { roas:4.15, cpa:663, spend:37125, purchases:56, label:"零售/購物" },
-  "美妝":          { roas:3.91, cpa:582, spend:3491, purchases:6, label:"美妝族群" },
-  "家電":          { roas:3.71, cpa:1061, spend:28640, purchases:27, label:"家電族群" },
-  "家務":          { roas:3.37, cpa:805, spend:13684, purchases:17, label:"家務族群" },
-  "高跟鞋":        { roas:3.46, cpa:933, spend:30788, purchases:33, label:"高跟鞋（女性）" },
-  "母親_禮物":     { roas:3.51, cpa:783, spend:15652, purchases:20, label:"母親節/送禮" },
-  "睡眠":          { roas:3.35, cpa:767, spend:220774, purchases:288, label:"睡眠族群" },
-  "SPA":           { roas:3.30, cpa:813, spend:768094, purchases:945, label:"SPA（廣泛）" },
-  "保健":          { roas:3.25, cpa:878, spend:7026, purchases:8, label:"保健族群" },
-  "禮物":          { roas:3.16, cpa:778, spend:110436, purchases:142, label:"禮物/送禮" },
-  "健康":          { roas:2.95, cpa:1003, spend:230792, purchases:230, label:"健康族群" },
-  "父母":          { roas:2.94, cpa:837, spend:145658, purchases:174, label:"父母族群" },
-  "健身":          { roas:2.59, cpa:919, spend:73495, purchases:80, label:"健身族群" },
-  "老師":          { roas:2.60, cpa:987, spend:120397, purchases:122, label:"教師族群" },
-  "沙發":          { roas:2.70, cpa:1008, spend:115873, purchases:115, label:"居家沙發" },
-  "壓力":          { roas:2.98, cpa:814, spend:11394, purchases:14, label:"壓力/舒壓" },
-  "網路購物":      { roas:2.86, cpa:913, spend:10041, purchases:11, label:"網路購物" },
+  // Top performers (ROAS > 5)
+  "團購":          { roas:9.05, cpa:252, spend:14839, purchases:59, label:"團購族群" },
+  "廚房":          { roas:7.48, cpa:768, spend:3070, purchases:4, label:"廚房/家務" },
+  "衛生紙":        { roas:6.87, cpa:377, spend:33972, purchases:90, label:"日用品族群" },
+  "咖啡":          { roas:4.43, cpa:483, spend:72517, purchases:150, label:"咖啡族群" },
+  "SPA_35+":       { roas:5.37, cpa:505, spend:120599, purchases:239, label:"SPA（35+女性）" },
+  // Strong performers (ROAS 3.5~5)
+  "葉黃素":        { roas:4.66, cpa:558, spend:283647, purchases:508, label:"葉黃素/眼部保健" },
+  "馬拉松":        { roas:4.30, cpa:687, spend:133897, purchases:195, label:"馬拉松/跑步" },
+  "旅遊":          { roas:4.29, cpa:566, spend:364353, purchases:644, label:"旅遊族群" },
+  "優惠":          { roas:4.15, cpa:687, spend:186169, purchases:271, label:"優惠導向" },
+  "生活":          { roas:4.07, cpa:728, spend:77883, purchases:107, label:"生活族群" },
+  "30+":           { roas:3.89, cpa:706, spend:208313, purchases:295, label:"30+年齡層" },
+  "母親_禮物":     { roas:3.80, cpa:716, spend:61590, purchases:86, label:"母親節/送禮" },
+  "電視":          { roas:3.68, cpa:771, spend:261488, purchases:339, label:"電視/戲劇" },
+  // Good performers (ROAS 3~3.5)
+  "SPA":           { roas:3.33, cpa:792, spend:1359920, purchases:1718, label:"SPA（廣泛）" },
+  "沙發":          { roas:3.30, cpa:699, spend:90159, purchases:129, label:"居家沙發" },
+  "登山":          { roas:3.21, cpa:809, spend:261353, purchases:323, label:"登山族群" },
+  "運動":          { roas:3.19, cpa:778, spend:145540, purchases:187, label:"運動族群" },
+  "網路購物":      { roas:3.11, cpa:841, spend:525889, purchases:625, label:"網路購物" },
+  "家電":          { roas:3.11, cpa:844, spend:219421, purchases:260, label:"家電族群" },
+  "家務":          { roas:3.10, cpa:1090, spend:40346, purchases:37, label:"家務族群" },
+  "上班族":        { roas:2.97, cpa:873, spend:586936, purchases:672, label:"上班族" },
+  "禮物":          { roas:2.97, cpa:990, spend:206994, purchases:209, label:"禮物/送禮" },
+  "睡眠":          { roas:2.97, cpa:854, spend:543321, purchases:636, label:"睡眠族群" },
+  // Moderate performers (ROAS 2~3)
+  "健身":          { roas:2.69, cpa:1067, spend:489888, purchases:459, label:"健身族群" },
+  "父母":          { roas:2.64, cpa:1009, spend:416910, purchases:413, label:"父母族群" },
+  "壓力":          { roas:2.44, cpa:1216, spend:109437, purchases:90, label:"壓力/舒壓" },
+  "家人":          { roas:2.38, cpa:1247, spend:149680, purchases:120, label:"家人/家庭" },
+  "老師":          { roas:1.91, cpa:1476, spend:33956, purchases:23, label:"教師族群" },
+  "高跟鞋":        { roas:1.76, cpa:1506, spend:36143, purchases:24, label:"高跟鞋（女性）" },
+  "美妝":          { roas:1.70, cpa:1772, spend:12403, purchases:7, label:"美妝族群" },
+  "保健":          { roas:1.44, cpa:1624, spend:40588, purchases:25, label:"保健族群" },
   // Overall average
-  "_overall":      { roas:2.62, cpa:982, spend:7796464, purchases:7935, label:"全興趣平均" },
+  "_overall":      { roas:2.99, cpa:864, spend:13663153, purchases:15809, label:"全興趣平均" },
 };
 
 // ===== PRODUCT → INTEREST MAPPING (using real Meta IDs) =====
@@ -1234,9 +1240,7 @@ function renderResults(r, audiences) {
     h += `<div class="copy-suggestion">✏️ 建議文案方向：「${a.copy}」</div></div>`;
   }
 
-  // API targeting spec
-  h += `<div class="section-title">🔧 API 受眾設定</div>`;
-  h += renderApiTargeting(audiences);
+  // API targeting spec removed per user request
 
   // Strategy
   h += `<div class="section-title">💡 投放策略建議</div>`;
@@ -1247,7 +1251,7 @@ function renderResults(r, audiences) {
   h += `<br><br>建議先以主力受眾跑 3-5 天收集數據，再根據 CTR 和 CPA 決定是否擴展到測試受眾。</p></div>`;
   h += `<div class="strategy-card"><h3>A/B 測試建議</h3><p>(1) <strong>受眾測試</strong>：主力 vs 測試受眾，觀察 CTR 和 CPA 差異<br>(2) <strong>版位測試</strong>：${audiences[0].placements[0]||'IG Reels'} vs ${audiences[0].placements[1]||'FB Feed'}<br>(3) <strong>文案測試</strong>：功能訴求 vs 情境訴求</p></div>`;
   if (r.qualityNotes&&r.qualityNotes.length>2) h += `<div class="strategy-card"><h3>⚠️ 素材品質備註</h3><p>${r.qualityNotes}</p></div>`;
-  h += `<div class="disclaimer">預估數據來自 3ZeBra 近 12 個月實際投放數據（已排除 DPA/DABA/RT/ASC），共 NT$7,796,464 花費、7,935 筆轉換，整體 ROAS 2.62。實際表現取決於投放時段、競價環境、產品頁轉換率等因素。</div>`;
+  h += `<div class="disclaimer">預估數據來自 3ZeBra 近三年實際投放數據（2023/04-2026/04，已排除 DPA/DABA/RT/ASC/LL），共 NT$13,663,153 花費、15,809 筆轉換，整體 ROAS 2.99。實際表現取決於投放時段、競價環境、產品頁轉換率等因素。</div>`;
   return h;
 }
 
