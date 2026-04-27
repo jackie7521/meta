@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>廣告素材受眾分析器 — 3ZeBra</title>
-<meta name="description" content="貼上 Gemini 素材分析報告，自動產出 Meta 廣告受眾設定建議">
+<meta name="description" content="貼上 Gemini 素材分析報告，自動產出 Meta 廣告受眾設定建議（含真實興趣 ID 與歷史 ROAS 數據）">
 <meta name="robots" content="noindex, nofollow">
 <style>
 :root {
@@ -36,7 +36,7 @@ body {
 }
 
 .page-wrapper {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 20px 16px 40px;
 }
@@ -62,6 +62,16 @@ body {
   color: var(--text-light);
   font-size: 14px;
   margin-top: 6px;
+}
+.version-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-top: 8px;
 }
 
 .steps-bar {
@@ -236,6 +246,7 @@ body {
 .tag-scene { background: #e8daef; color: #6c3483; }
 .tag-audio { background: #fadbd8; color: #943126; }
 .tag-people { background: #d6eaf8; color: #21618c; }
+.tag-data { background: #d5f5e3; color: #1e8449; }
 
 .summary-grid {
   display: grid;
@@ -365,6 +376,29 @@ body {
   padding: 3px 10px;
   border-radius: 12px;
   font-size: 11.5px;
+  cursor: default;
+  position: relative;
+}
+.interest-tag .meta-id {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand-dark);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 10;
+  margin-bottom: 4px;
+}
+.interest-tag:hover .meta-id { display: block; }
+.interest-tag.has-roas {
+  background: #d5f5e3;
+  color: #1e8449;
+  font-weight: 500;
 }
 .placement-tag {
   background: #e8f5e9;
@@ -403,6 +437,31 @@ body {
   line-height: 1.7;
 }
 
+/* Historical data box */
+.historical-box {
+  background: linear-gradient(135deg, #e8f8f5, #d5f5e3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: #1e8449;
+  margin: 10px 0;
+  line-height: 1.7;
+  border: 1px solid #a9dfbf;
+}
+.historical-box strong { color: #196f3d; }
+.hist-metric {
+  display: inline-block;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin: 2px 3px;
+  font-size: 12px;
+}
+.hist-metric.good { color: var(--green); }
+.hist-metric.ok { color: #e67e22; }
+.hist-metric.bad { color: var(--red); }
+
 .budget-row {
   display: flex;
   gap: 20px;
@@ -422,6 +481,46 @@ body {
   color: var(--brand-mid);
   line-height: 1.6;
 }
+
+/* Meta API Copy Section */
+.api-copy-section {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.api-copy-section h3 {
+  font-size: 15px;
+  color: var(--brand-dark);
+  margin-bottom: 10px;
+}
+.api-code {
+  background: #2d3436;
+  color: #dfe6e9;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.25); }
 
 /* Strategy Section */
 .strategy-card {
@@ -501,6 +600,7 @@ body {
     <div class="logo">3ZeBra Tools</div>
     <h1>廣告素材受眾分析器</h1>
     <p>貼上 Gemini 分析報告，自動產出 Meta 受眾建議</p>
+    <div class="version-badge">v2.0 — 真實 Meta 興趣 ID + 歷史 ROAS 數據</div>
   </div>
 
   <div class="steps-bar">
@@ -532,19 +632,20 @@ body {
       <strong>使用步驟：</strong><br>
       1. 把廣告影片丟到 Gemini 的「廣告素材影片分析器」Gem<br>
       2. 複製 Gem 產出的完整分析報告<br>
-      3. 貼到上方文字框，按「分析受眾」
+      3. 貼到上方文字框，按「分析受眾」<br><br>
+      <strong>v2.0 新功能：</strong>興趣標籤使用真實 Meta Marketing API ID，預算/CPA 建議來自 3ZeBra 近一年實際投放數據
     </div>
     <div class="error-msg" id="errorMsg"></div>
   </div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <p>正在匹配最佳受眾...</p>
+    <p>正在匹配最佳受眾（比對歷史 ROAS 數據中...）</p>
   </div>
 
   <div class="results" id="results"></div>
 
-  <div class="footer">3ZeBra 內部工具 &middot; 受眾建議僅供參考</div>
+  <div class="footer">3ZeBra 內部工具 v2.0 &middot; 數據更新至 2026/04 &middot; 受眾建議僅供參考</div>
 </div>
 
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
@@ -560,6 +661,190 @@ document.getElementById('reportInput').addEventListener('focus', function() {
 window.addEventListener('scroll', function() {
   document.getElementById('backTop').classList.toggle('show', window.scrollY > 400);
 });
+
+// ===== REAL META INTEREST DATABASE (from Meta Marketing API Targeting Search) =====
+const META_INTERESTS = {
+  // 健身_重訓
+  "健身":       { id:"6003277229371", name:"健身", size:798347030, cat:"健身_重訓" },
+  "重量訓練":   { id:"6003473077165", name:"重量訓練", size:225461942, cat:"健身_重訓" },
+  "CrossFit":   { id:"6003092532417", name:"混合健身（CrossFit）", size:137467480, cat:"健身_重訓" },
+  "健身俱樂部": { id:"6003420915231", name:"健身俱樂部", size:160107010, cat:"健身_重訓" },
+  "健美和健身": { id:"6003054306185", name:"健美和健身", size:17106740, cat:"健身_重訓" },
+  "World Gym":  { id:"6003270745393", name:"World Gym", size:13181854, cat:"健身_重訓" },
+  "Gold's Gym": { id:"6003283387551", name:"Gold's Gym", size:14435174, cat:"健身_重訓" },
+  "深蹲":       { id:"6003238615358", name:"深蹲", size:15544050, cat:"健身_重訓" },
+  "MyFitnessPal":{ id:"6009539829781", name:"MyFitnessPal", size:9428520, cat:"健身_重訓" },
+  "街頭健身":   { id:"6009986890906", name:"街頭健身", size:9697950, cat:"健身_重訓" },
+  "Resistance band":{ id:"6014123879573", name:"Resistance band", size:3272140, cat:"健身_重訓" },
+  // 運動_跑步_戶外
+  "運動":       { id:"6003269553527", name:"運動（體育運動）", size:1701633800, cat:"運動_跑步_戶外" },
+  "瑜珈":       { id:"6003306084421", name:"瑜珈", size:449755406, cat:"運動_跑步_戶外" },
+  "自行車":     { id:"6003402532547", name:"自行車", size:231277130, cat:"運動_跑步_戶外" },
+  "團隊運動":   { id:"6003160002408", name:"團隊運動", size:273899880, cat:"運動_跑步_戶外" },
+  "運動服裝":   { id:"6003545471303", name:"運動服裝", size:171126510, cat:"運動_跑步_戶外" },
+  "有氧運動":   { id:"6002959752320", name:"有氧運動", size:25464060, cat:"運動_跑步_戶外" },
+  "伸展":       { id:"6003124232258", name:"伸展（Stretching）", size:11810160, cat:"運動_跑步_戶外" },
+  "Yin yoga":   { id:"6003121551334", name:"Yin yoga", size:2417310, cat:"運動_跑步_戶外" },
+  "馬拉松":     { id:"6003404628164", name:"Marathon Sports", size:2831570, cat:"運動_跑步_戶外" },
+  "Brooks Running":{ id:"6013339239507", name:"Brooks Running", size:4172490, cat:"運動_跑步_戶外" },
+  // 健康_養生_保健
+  "健身和保健": { id:"6003384248805", name:"健身和保健", size:1274492610, cat:"健康_養生_保健" },
+  "健康和保健": { id:"6003258544357", name:"健康和保健（個人護理）", size:243641737, cat:"健康_養生_保健" },
+  "SPA":        { id:"6003254590688", name:"水療（SPA）", size:692447158, cat:"健康_養生_保健" },
+  "蛋白質":     { id:"6003331937771", name:"蛋白質", size:317933990, cat:"健康_養生_保健" },
+  "睡眠":       { id:"6002989170450", name:"睡眠", size:315606400, cat:"健康_養生_保健" },
+  "自我照護":   { id:"6003244295567", name:"自我照護", size:59827108, cat:"健康_養生_保健" },
+  // 居家_家電
+  "居家裝修":   { id:"6003234413249", name:"居家裝修", size:394840382, cat:"居家_家電" },
+  "家電":       { id:"6003343997689", name:"家電", size:311994620, cat:"居家_家電" },
+  "IKEA":       { id:"6003427723137", name:"宜家家居（IKEA）", size:115980264, cat:"居家_家電" },
+  "Dyson":      { id:"6003361187187", name:"戴森（Dyson）", size:24559930, cat:"居家_家電" },
+  "Panasonic":  { id:"6003413128606", name:"松下電器（Panasonic）", size:35953190, cat:"居家_家電" },
+  // 購物_網購_電商
+  "網路購物":   { id:"6003346592981", name:"網路購物", size:1584554190, cat:"購物_網購_電商" },
+  "電子商務":   { id:"6003221485467", name:"電子商務", size:303492870, cat:"購物_網購_電商" },
+  "優惠券":     { id:"6003054884732", name:"優惠券", size:679494660, cat:"購物_網購_電商" },
+  // 送禮_節日
+  "禮物":       { id:"6003019539929", name:"禮物", size:505186750, cat:"送禮_節日" },
+  "Gift card":  { id:"6003344138028", name:"Gift card", size:71770430, cat:"送禮_節日" },
+  // 上班族_辦公
+  "上班族":     { id:"6003629755773", name:"上班族", size:11368360, cat:"上班族_辦公" },
+  "遠距工作":   { id:"6003343813828", name:"遠距工作", size:24317570, cat:"上班族_辦公" },
+  // 運動品牌
+  "Nike":       { id:"6003392754754", name:"Nike", size:148792613, cat:"運動品牌" },
+  "Adidas":     { id:"6003318557654", name:"Adidas", size:249741120, cat:"運動品牌" },
+  "Under Armour":{ id:"6003024704693", name:"Under Armour", size:47091720, cat:"運動品牌" },
+  "Lululemon":  { id:"6003156069384", name:"Lululemon", size:25517074, cat:"運動品牌" },
+  "Garmin":     { id:"6003166470558", name:"Garmin", size:14614090, cat:"運動品牌" },
+  "Fitbit":     { id:"6002995668044", name:"Fitbit", size:17121120, cat:"運動品牌" },
+  // 美容_護膚
+  "美容沙龍":   { id:"6003088846792", name:"美容沙龍", size:726997750, cat:"美容_護膚" },
+  "天然護膚":   { id:"6003875393160", name:"天然護膚", size:117297252, cat:"美容_護膚" },
+};
+
+// ===== 3ZeBra HISTORICAL PERFORMANCE DATA (past 12 months, filtered: no DPA/DABA/RT/ASC) =====
+// Aggregated by interest category keyword, sorted by ROAS
+const HISTORICAL_PERF = {
+  // High performers (ROAS > 5)
+  "SPA_35+":       { roas:6.58, cpa:401, spend:60620, purchases:151, label:"SPA（35+女性）" },
+  "物理治療":      { roas:6.50, cpa:447, spend:62525, purchases:140, label:"物理治療師受眾" },
+  "上班族":        { roas:6.50, cpa:488, spend:7810, purchases:16, label:"上班族" },
+  "優惠":          { roas:7.70, cpa:450, spend:7202, purchases:16, label:"優惠導向" },
+  "登山":          { roas:7.02, cpa:464, spend:3251, purchases:7, label:"登山族群" },
+  "家人":          { roas:6.31, cpa:498, spend:4483, purchases:9, label:"家人/家庭" },
+  // Good performers (ROAS 3~5)
+  "廚房":          { roas:5.11, cpa:545, spend:19606, purchases:36, label:"廚房/家務" },
+  "生理用品":      { roas:4.94, cpa:728, spend:7283, purchases:10, label:"生理用品（女性）" },
+  "肩頸":          { roas:4.47, cpa:685, spend:10282, purchases:15, label:"肩頸痠痛" },
+  "運動":          { roas:4.12, cpa:944, spend:24541, purchases:26, label:"運動族群" },
+  "零售":          { roas:4.15, cpa:663, spend:37125, purchases:56, label:"零售/購物" },
+  "美妝":          { roas:3.91, cpa:582, spend:3491, purchases:6, label:"美妝族群" },
+  "家電":          { roas:3.71, cpa:1061, spend:28640, purchases:27, label:"家電族群" },
+  "家務":          { roas:3.37, cpa:805, spend:13684, purchases:17, label:"家務族群" },
+  "高跟鞋":        { roas:3.46, cpa:933, spend:30788, purchases:33, label:"高跟鞋（女性）" },
+  "母親_禮物":     { roas:3.51, cpa:783, spend:15652, purchases:20, label:"母親節/送禮" },
+  "睡眠":          { roas:3.35, cpa:767, spend:220774, purchases:288, label:"睡眠族群" },
+  "SPA":           { roas:3.30, cpa:813, spend:768094, purchases:945, label:"SPA（廣泛）" },
+  "保健":          { roas:3.25, cpa:878, spend:7026, purchases:8, label:"保健族群" },
+  "禮物":          { roas:3.16, cpa:778, spend:110436, purchases:142, label:"禮物/送禮" },
+  "健康":          { roas:2.95, cpa:1003, spend:230792, purchases:230, label:"健康族群" },
+  "父母":          { roas:2.94, cpa:837, spend:145658, purchases:174, label:"父母族群" },
+  "健身":          { roas:2.59, cpa:919, spend:73495, purchases:80, label:"健身族群" },
+  "老師":          { roas:2.60, cpa:987, spend:120397, purchases:122, label:"教師族群" },
+  "沙發":          { roas:2.70, cpa:1008, spend:115873, purchases:115, label:"居家沙發" },
+  "壓力":          { roas:2.98, cpa:814, spend:11394, purchases:14, label:"壓力/舒壓" },
+  "網路購物":      { roas:2.86, cpa:913, spend:10041, purchases:11, label:"網路購物" },
+  // Overall average
+  "_overall":      { roas:2.62, cpa:982, spend:7796464, purchases:7935, label:"全興趣平均" },
+};
+
+// ===== PRODUCT → INTEREST MAPPING (using real Meta IDs) =====
+const PRODUCT_MAP = {
+  '按摩椅': {
+    ageMin:35, ageMax:65, gender:'all',
+    baseInterests:['SPA','家電','居家裝修','健身和保健','睡眠'],
+    histKeys:['SPA','SPA_35+','家電','睡眠','沙發'],
+  },
+  '按摩槍': {
+    ageMin:25, ageMax:45, gender:'male',
+    baseInterests:['健身','重量訓練','CrossFit','運動','蛋白質'],
+    histKeys:['健身','運動','物理治療'],
+  },
+  '筋膜槍': {
+    ageMin:25, ageMax:45, gender:'male',
+    baseInterests:['健身','重量訓練','CrossFit','運動','蛋白質'],
+    histKeys:['健身','運動','物理治療'],
+  },
+  '按摩枕': {
+    ageMin:25, ageMax:55, gender:'female',
+    baseInterests:['上班族','睡眠','SPA','自我照護'],
+    histKeys:['上班族','睡眠','SPA','肩頸','壓力'],
+  },
+  '眼部按摩器': {
+    ageMin:22, ageMax:45, gender:'female',
+    baseInterests:['上班族','睡眠','自我照護','遠距工作'],
+    histKeys:['上班族','睡眠','壓力'],
+  },
+  '眼罩': {
+    ageMin:22, ageMax:45, gender:'female',
+    baseInterests:['睡眠','自我照護','SPA','上班族'],
+    histKeys:['睡眠','上班族','SPA'],
+  },
+  '足部按摩機': {
+    ageMin:35, ageMax:60, gender:'all',
+    baseInterests:['SPA','健身和保健','健康和保健'],
+    histKeys:['SPA','SPA_35+','高跟鞋','保健'],
+  },
+  '腰部按摩': {
+    ageMin:25, ageMax:55, gender:'all',
+    baseInterests:['上班族','SPA','健身和保健','自我照護'],
+    histKeys:['上班族','SPA','壓力','肩頸'],
+  },
+  '膝蓋按摩器': {
+    ageMin:35, ageMax:65, gender:'all',
+    baseInterests:['健身和保健','SPA','運動','健康和保健'],
+    histKeys:['物理治療','SPA_35+','運動','父母','健康'],
+  },
+  '體脂計': {
+    ageMin:22, ageMax:40, gender:'all',
+    baseInterests:['健身','健身和保健','蛋白質','運動'],
+    histKeys:['健身','運動','健康'],
+  },
+};
+
+// Style adjustments with real Meta interests
+const STYLE_ADJUST = {
+  'KOL':  { ageDelta:-3, addInterests:['網路購物','美容沙龍'] },
+  '網紅': { ageDelta:-3, addInterests:['網路購物','美容沙龍'] },
+  '推薦': { ageDelta:-2, addInterests:['網路購物'] },
+  '評測': { ageDelta:0, addInterests:['Dyson','Garmin'] },
+  '比較': { ageDelta:0, addInterests:['電子商務','Dyson'] },
+  '開箱': { ageDelta:-3, addInterests:['電子商務','網路購物'] },
+  '居家': { ageDelta:0, addInterests:['居家裝修','IKEA','家電'] },
+  '運動': { ageDelta:0, addInterests:['運動','Nike','Adidas','Garmin'] },
+  '促銷': { ageDelta:0, addInterests:['網路購物','優惠券','電子商務'] },
+  '優惠': { ageDelta:0, addInterests:['優惠券','網路購物'] },
+  '送禮': { ageDelta:0, addInterests:['禮物','Gift card'] },
+  '情境': { ageDelta:0, addInterests:[] },
+};
+
+// Emotion/appeal → real Meta interests
+const EMOTION_INTERESTS = {
+  '舒壓':['SPA','瑜珈','自我照護','睡眠'],
+  '放鬆':['SPA','瑜珈','自我照護','睡眠'],
+  '運動恢復':['健身','運動','蛋白質','伸展'],
+  '健康':['健身和保健','健康和保健'],
+  '保健':['健身和保健','健康和保健'],
+  'CP值':['優惠券','網路購物','電子商務'],
+  '划算':['優惠券','網路購物'],
+  '科技':['Dyson','Garmin','Fitbit'],
+  '痠痛':['上班族','SPA','自我照護'],
+  '肩頸':['上班族','SPA','自我照護'],
+  '睡眠':['睡眠','自我照護'],
+  '送禮':['禮物','Gift card'],
+  '孝親':['禮物'],
+  '生活品質':['居家裝修','SPA','自我照護'],
+};
 
 // ===== PARSING =====
 function parseReport(text) {
@@ -603,46 +888,17 @@ function parseReport(text) {
 }
 
 // ===== MATCHING ENGINE =====
-const PRODUCT_MAP = {
-  '按摩椅': { ageMin:35, ageMax:65, gender:'all', baseInterests:['居家生活','健康養生','家電','居家裝潢'], baseBehaviors:['家電購買者'] },
-  '按摩槍': { ageMin:25, ageMax:45, gender:'male', baseInterests:['健身','運動','CrossFit','重量訓練'], baseBehaviors:['運動用品購買者'] },
-  '筋膜槍': { ageMin:25, ageMax:45, gender:'male', baseInterests:['健身','運動','CrossFit','重量訓練'], baseBehaviors:['運動用品購買者'] },
-  '按摩枕': { ageMin:25, ageMax:55, gender:'female', baseInterests:['辦公室上班族','舒壓','睡眠品質'], baseBehaviors:['線上購物活躍用戶'] },
-  '眼部按摩器':{ ageMin:22, ageMax:45, gender:'female', baseInterests:['3C族','長時間用眼','上班族','眼部保養'], baseBehaviors:['線上購物活躍用戶'] },
-  '眼罩': { ageMin:22, ageMax:45, gender:'female', baseInterests:['睡眠品質','舒壓','眼部保養'], baseBehaviors:['線上購物活躍用戶'] },
-  '足部按摩機':{ ageMin:35, ageMax:60, gender:'all', baseInterests:['養生保健','久站工作者','中醫'], baseBehaviors:['保健品購買者'] },
-};
-
-const STYLE_ADJUST = {
-  'KOL':{ ageDelta:-5, addInterests:['網紅追蹤','社群媒體','開箱'] },
-  '網紅':{ ageDelta:-5, addInterests:['網紅追蹤','社群媒體','開箱'] },
-  '推薦':{ ageDelta:-3, addInterests:['網紅追蹤','口碑推薦'] },
-  '評測':{ ageDelta:0, addInterests:['3C產品','開箱評測','比價'] },
-  '比較':{ ageDelta:0, addInterests:['3C產品','開箱評測','比價'] },
-  '開箱':{ ageDelta:-3, addInterests:['開箱評測','3C產品','YouTube'] },
-  '居家':{ ageDelta:0, addInterests:['居家裝潢','生活品質','居家生活'] },
-  '運動':{ ageDelta:0, addInterests:['馬拉松','瑜珈','Garmin','戶外運動'] },
-  '促銷':{ ageDelta:0, addInterests:['網購','優惠券','團購','限時優惠'] },
-  '優惠':{ ageDelta:0, addInterests:['網購','優惠券','比價'] },
-  '送禮':{ ageDelta:0, addInterests:['送禮','節日禮物'] },
-};
-
-const EMOTION_INTERESTS = {
-  '舒壓':['SPA','冥想','精油','瑜珈'], '放鬆':['SPA','冥想','精油','瑜珈'],
-  '運動恢復':['物理治療','運動營養','蛋白質補充品'],
-  '健康':['中醫','養生','保健食品'], '保健':['中醫','養生','保健食品'],
-  'CP值':['比價','團購','網購優惠'], '划算':['比價','團購','網購優惠'],
-  '科技':['智慧家電','科技新品','Apple'],
-  '痠痛':['辦公室久坐','人體工學','物理治療'],
-  '肩頸':['辦公室久坐','人體工學','上班族'],
-};
-
 function matchProduct(cat) {
   const c = (cat||'').toLowerCase();
   for (const [k,v] of Object.entries(PRODUCT_MAP)) {
     if (c.includes(k.toLowerCase()) || c.includes(k)) return {...v, matched:k};
   }
-  return { ageMin:25, ageMax:55, gender:'all', baseInterests:['健康','生活品質'], baseBehaviors:['線上購物活躍用戶'], matched:cat||'其他' };
+  // Fallback: try broader matches
+  if (c.includes('腰') || c.includes('呼呼')) return {...PRODUCT_MAP['腰部按摩'], matched:'腰部按摩器'};
+  if (c.includes('膝') || c.includes('好膝力')) return {...PRODUCT_MAP['膝蓋按摩器'], matched:'膝蓋按摩器'};
+  if (c.includes('肩') || c.includes('好肩力')) return {...PRODUCT_MAP['按摩枕'], matched:'肩頸按摩器'};
+  if (c.includes('腿') || c.includes('好腿力')) return {...PRODUCT_MAP['足部按摩機'], matched:'腿部按摩器'};
+  return { ageMin:25, ageMax:55, gender:'all', baseInterests:['健身和保健','SPA','網路購物'], histKeys:['SPA','健康','網路購物'], matched:cat||'其他' };
 }
 
 function applyStyleAdjust(base, videoType, scene) {
@@ -664,66 +920,133 @@ function applyEmotionInterests(appeal) {
 
 function applyAudioInsights(r) {
   const vo = (r.voiceover||'')+' '+(r.speakTone||'');
-  const adj = { ageDelta:0, interests:[], genderHint:null };
-  if (vo.includes('上班族')||vo.includes('辦公室')) adj.interests.push('辦公室','上班族');
-  if (vo.includes('媽媽')||vo.includes('長輩')||vo.includes('送禮')||vo.includes('母親節')) adj.interests.push('送禮','親子');
-  if (vo.includes('運動')||vo.includes('練完')||vo.includes('健身')) adj.interests.push('健身','運動恢復');
+  const adj = { ageDelta:0, interests:[], genderHint:null, histKeys:[] };
+  if (vo.includes('上班族')||vo.includes('辦公室')) { adj.interests.push('上班族','遠距工作'); adj.histKeys.push('上班族'); }
+  if (vo.includes('媽媽')||vo.includes('長輩')||vo.includes('送禮')||vo.includes('母親節')) { adj.interests.push('禮物'); adj.histKeys.push('母親_禮物','禮物','父母'); }
+  if (vo.includes('運動')||vo.includes('練完')||vo.includes('健身')) { adj.interests.push('健身','運動'); adj.histKeys.push('健身','運動'); }
   if (vo.includes('搞笑')||vo.includes('幽默')||vo.includes('輕鬆')) adj.ageDelta=-3;
   if (vo.includes('專業')||vo.includes('正式')||vo.includes('認真')) adj.ageDelta=2;
   if (r.speakLang&&(r.speakLang.includes('台語')||r.speakLang.includes('閩南語'))) adj.ageDelta=3;
-  if (vo.includes('價格')||vo.includes('划算')||vo.includes('便宜')||vo.includes('CP值')) adj.interests.push('比價','網購優惠');
+  if (vo.includes('價格')||vo.includes('划算')||vo.includes('便宜')||vo.includes('CP值')) { adj.interests.push('優惠券','網路購物'); adj.histKeys.push('優惠'); }
+  if (vo.includes('痠痛')||vo.includes('肩頸')||vo.includes('酸痛')) { adj.interests.push('SPA','自我照護'); adj.histKeys.push('肩頸','SPA'); }
+  if (vo.includes('物理治療')||vo.includes('治療師')) adj.histKeys.push('物理治療');
   return adj;
 }
 
 function determinePlacements(r) {
-  const t = (r.visualTone||'')+' '+(r.pace||'')+' '+(r.quality||'');
+  const t = (r.visualTone||'')+' '+(r.pace||'')+' '+(r.quality||'')+' '+(r.videoType||'');
   const p = [];
   if (t.includes('活潑')||t.includes('快')||t.includes('動感')||t.includes('明亮')) p.push('Instagram Reels');
   if (t.includes('年輕')||t.includes('時尚')||t.includes('UGC')||t.includes('手機')) p.push('Instagram Reels','Instagram 限時動態');
+  if (t.includes('KOL')||t.includes('網紅')||t.includes('開箱')) p.push('Instagram Reels','Instagram 限時動態');
   if (t.includes('專業')||t.includes('沉穩')||t.includes('慢')) p.push('Facebook 動態消息','Audience Network');
   if (t.includes('溫暖')||t.includes('溫馨')||t.includes('居家')||t.includes('舒適')) p.push('Facebook 動態消息','Instagram 動態');
   if (p.length===0) p.push('Facebook 動態消息','Instagram Reels');
   return [...new Set(p)];
 }
 
-function estimatePerformance(score) {
-  if (score>=7) return { level:'高', en:'high', budget:'800-1,200', cpa:'200-400' };
-  if (score>=4) return { level:'中', en:'medium', budget:'500-800', cpa:'350-600' };
-  return { level:'低', en:'low', budget:'300-500', cpa:'500-800' };
+// Get historical performance for a set of hist keys
+function getHistPerf(histKeys) {
+  const matches = [];
+  for (const k of histKeys) {
+    if (HISTORICAL_PERF[k]) matches.push({key:k, ...HISTORICAL_PERF[k]});
+  }
+  matches.sort((a,b)=>b.roas-a.roas);
+  return matches;
+}
+
+function estimateFromHistory(histKeys) {
+  const perfs = getHistPerf(histKeys);
+  if (perfs.length === 0) return { level:'中', en:'medium', budget:'500-800', cpa:'600-900', roas:'2.5-3.5', histMatches:[] };
+
+  // Weighted average by spend
+  let totalSpend=0, weightedRoas=0, weightedCpa=0;
+  for (const p of perfs) { totalSpend+=p.spend; weightedRoas+=p.roas*p.spend; weightedCpa+=p.cpa*p.spend; }
+  const avgRoas = (totalSpend>0) ? (weightedRoas/totalSpend) : 3.0;
+  const avgCpa = (totalSpend>0) ? Math.round(weightedCpa/totalSpend) : 800;
+
+  let level, en, budget;
+  if (avgRoas >= 5) { level='高'; en='high'; budget='800-1,200'; }
+  else if (avgRoas >= 3) { level='中高'; en='high'; budget='600-1,000'; }
+  else if (avgRoas >= 2) { level='中'; en='medium'; budget='500-800'; }
+  else { level='低'; en='low'; budget='300-500'; }
+
+  const cpaLow = Math.round(avgCpa*0.8);
+  const cpaHigh = Math.round(avgCpa*1.3);
+  const roasLow = (avgRoas*0.7).toFixed(1);
+  const roasHigh = (avgRoas*1.2).toFixed(1);
+
+  return { level, en, budget, cpa:`${cpaLow}-${cpaHigh}`, roas:`${roasLow}-${roasHigh}`, avgRoas:avgRoas.toFixed(2), avgCpa, histMatches:perfs.slice(0,5) };
+}
+
+function resolveInterest(key) {
+  if (META_INTERESTS[key]) return META_INTERESTS[key];
+  // Fuzzy match
+  for (const [k,v] of Object.entries(META_INTERESTS)) {
+    if (k.includes(key) || key.includes(k)) return v;
+  }
+  return null;
 }
 
 function buildAudienceName(gender, interests, product) {
   const g = gender==='male'?'男性':gender==='female'?'女性':'';
-  return `${interests[0]||'生活'}${g?g:'族群'}—${product}愛好者`;
+  const first = interests[0] || '生活';
+  const meta = META_INTERESTS[first];
+  const displayName = meta ? meta.name.replace(/（.*）/,'') : first;
+  return `${displayName}${g?'・'+g:''}族群 — ${product}`;
 }
 
 function buildExpandName(r) {
   const c = r.productCategory||'';
-  if (c.includes('按摩槍')||c.includes('筋膜槍')) return '3C 科技與運動裝備關注者';
+  if (c.includes('按摩槍')||c.includes('筋膜槍')) return '運動科技裝備關注者';
   if (c.includes('按摩椅')) return '居家品質升級族群';
-  if (c.includes('按摩枕')||c.includes('眼')) return '職場健康意識族群';
+  if (c.includes('按摩枕')||c.includes('眼')||c.includes('肩')) return '職場健康意識族群';
+  if (c.includes('足')||c.includes('腿')) return '久站工作者 / 高跟鞋族群';
+  if (c.includes('腰')) return '辦公久坐族群';
+  if (c.includes('膝')) return '長輩孝親送禮族群';
   return '生活品質追求者';
 }
 
 function buildExpandInterests(r) {
   const c = r.productCategory||'';
-  if (c.includes('按摩槍')||c.includes('筋膜槍')) return ['3C產品','開箱評測','科技新品','GoPro','Apple Watch','運動科技'];
-  if (c.includes('按摩椅')) return ['居家裝潢','家電','智慧家電','IKEA','生活品質'];
-  if (c.includes('按摩枕')||c.includes('眼')) return ['辦公室好物','文具控','上班族日常','咖啡','自我提升'];
-  return ['網購','生活好物','開箱','比價','品質生活'];
+  if (c.includes('按摩槍')||c.includes('筋膜槍')) return ['Garmin','Fitbit','Nike','Under Armour','運動服裝'];
+  if (c.includes('按摩椅')) return ['居家裝修','IKEA','Dyson','Panasonic','家電'];
+  if (c.includes('按摩枕')||c.includes('眼')||c.includes('肩')) return ['上班族','遠距工作','自我照護','天然護膚','美容沙龍'];
+  if (c.includes('足')||c.includes('腿')) return ['SPA','美容沙龍','瑜珈','天然護膚'];
+  if (c.includes('膝')) return ['禮物','Gift card','健身和保健','健康和保健'];
+  return ['網路購物','電子商務','自我照護','SPA'];
 }
 
-function buildReasoning(r, type, interests) {
+function buildExpandHistKeys(r) {
+  const c = r.productCategory||'';
+  if (c.includes('按摩槍')||c.includes('筋膜槍')) return ['運動','健身'];
+  if (c.includes('按摩椅')) return ['家電','沙發','睡眠'];
+  if (c.includes('按摩枕')||c.includes('眼')||c.includes('肩')) return ['上班族','美妝','壓力'];
+  if (c.includes('足')||c.includes('腿')) return ['高跟鞋','SPA','美妝'];
+  if (c.includes('膝')) return ['禮物','父母','老師'];
+  return ['網路購物','SPA','健康'];
+}
+
+function buildReasoning(r, type, interests, histPerf) {
   const cat=r.productCategory||'產品', scene=r.scene||'', vo=r.voiceover||'';
   if (type==='main') {
     let s=`素材展示的${cat}`;
     if (scene) s+=`搭配${scene}場景`;
     s+=`，與此受眾的生活方式高度吻合。`;
     if (vo&&vo!=='無法判斷'&&vo.length>5) s+=`影片口說內容強化了產品訴求，能觸發目標族群的需求共鳴。`;
-    s+=`興趣組合（${interests.slice(0,3).join('、')}）精準鎖定核心購買者。`;
+    if (histPerf.histMatches.length>0) {
+      const top = histPerf.histMatches[0];
+      s+=`根據歷史數據，類似受眾「${top.label}」的 ROAS 為 ${top.roas}，表現${top.roas>=4?'優異':top.roas>=3?'良好':'穩定'}。`;
+    }
     return s;
   }
-  if (type==='test') return `擴大受眾範圍進行測試，觀察素材對非核心族群的擴散效果。保留核心興趣的同時加入相鄰領域，用於驗證素材的跨族群吸引力。`;
+  if (type==='test') {
+    let s=`擴大受眾範圍進行測試，觀察素材對非核心族群的擴散效果。`;
+    if (histPerf.histMatches.length>0) {
+      s+=`參考歷史數據，加權平均 ROAS ${histPerf.avgRoas}，仍有測試價值。`;
+    }
+    return s;
+  }
   return `探索潛在新客群。這群人可能對${cat}有潛在需求但尚未被直接觸及。測試效果好的話，可針對此族群製作專屬素材。`;
 }
 
@@ -735,6 +1058,7 @@ function buildCopy(r, type) {
     if (appeal.includes('痠痛')||appeal.includes('肩頸')) return `肩頸硬得像石頭？${cat}60秒幫你鬆開`;
     if (appeal.includes('CP值')||appeal.includes('划算')) return `這個價格買到這種等級的${cat}，不買可惜`;
     if (appeal.includes('送禮')) return `送這個，比說一百句關心都有用`;
+    if (appeal.includes('睡眠')||appeal.includes('助眠')) return `睡前按一按，一覺到天亮——${cat}`;
     return `你值得更好的放鬆方式——${cat}讓每天都有好狀態`;
   }
   if (type==='test') return `不管什麼生活型態，身體的痠痛都需要被照顧——試試${cat}`;
@@ -742,86 +1066,206 @@ function buildCopy(r, type) {
 }
 
 function generateAudiences(r) {
-  const product=matchProduct(r.productCategory);
-  const style=applyStyleAdjust(product,r.videoType,r.scene);
-  const emotionInts=applyEmotionInterests(r.coreAppeal);
-  const audioAdj=applyAudioInsights(r);
-  const placements=determinePlacements(r);
+  const product = matchProduct(r.productCategory);
+  const style = applyStyleAdjust(product, r.videoType, r.scene);
+  const emotionInts = applyEmotionInterests(r.coreAppeal);
+  const audioAdj = applyAudioInsights(r);
+  const placements = determinePlacements(r);
 
-  const mainInts=[...new Set([...product.baseInterests,...style.extraInterests.slice(0,3),...emotionInts.slice(0,2),...audioAdj.interests.slice(0,2)])];
-  const mainAgeMin=Math.max(18,product.ageMin+style.ageDelta+audioAdj.ageDelta);
-  const mainAgeMax=Math.min(65,product.ageMax+style.ageDelta+audioAdj.ageDelta);
-  const mainGender=audioAdj.genderHint||product.gender;
-  const main={ name:buildAudienceName(mainGender,mainInts,product.matched), priority:'主力受眾', cls:'main', ageMin:mainAgeMin, ageMax:mainAgeMax, gender:mainGender, interests:mainInts, behaviors:product.baseBehaviors, placements:placements.slice(0,2), perf:estimatePerformance(8), reasoning:buildReasoning(r,'main',mainInts), copy:buildCopy(r,'main') };
+  // === Main audience ===
+  const mainInts = [...new Set([...product.baseInterests, ...style.extraInterests.slice(0,2), ...emotionInts.slice(0,2), ...audioAdj.interests.slice(0,2)])];
+  const mainAgeMin = Math.max(18, product.ageMin + style.ageDelta + audioAdj.ageDelta);
+  const mainAgeMax = Math.min(65, product.ageMax + style.ageDelta + audioAdj.ageDelta);
+  const mainGender = audioAdj.genderHint || product.gender;
+  const mainHistKeys = [...new Set([...(product.histKeys||[]), ...audioAdj.histKeys])];
+  const mainPerf = estimateFromHistory(mainHistKeys);
+  const main = {
+    name: buildAudienceName(mainGender, mainInts, product.matched),
+    priority:'主力受眾', cls:'main',
+    ageMin:mainAgeMin, ageMax:mainAgeMax, gender:mainGender,
+    interests:mainInts.slice(0,8),
+    placements:placements.slice(0,2),
+    perf:mainPerf,
+    reasoning:buildReasoning(r,'main',mainInts,mainPerf),
+    copy:buildCopy(r,'main'),
+    histKeys:mainHistKeys,
+  };
 
-  const testInts=[...new Set([...style.extraInterests,...emotionInts,...audioAdj.interests])].filter(i=>!mainInts.includes(i));
-  const broadInts=[...mainInts.slice(0,2),...testInts.slice(0,4)];
-  const test={ name:buildAudienceName('all',broadInts.length?broadInts:['健康生活'],'廣泛'), priority:'測試受眾', cls:'test', ageMin:Math.max(18,mainAgeMin-3), ageMax:Math.min(65,mainAgeMax+5), gender:'all', interests:broadInts.length?broadInts:['健康生活','網購','生活品質','運動休閒'], behaviors:['線上購物活躍用戶'], placements:placements, perf:estimatePerformance(5), reasoning:buildReasoning(r,'test',broadInts), copy:buildCopy(r,'test') };
+  // === Test audience ===
+  const testExtraInts = [...new Set([...style.extraInterests, ...emotionInts, ...audioAdj.interests])].filter(i=>!mainInts.includes(i));
+  const testInts = [...mainInts.slice(0,3), ...testExtraInts.slice(0,4)];
+  const testHistKeys = [...new Set([...(product.histKeys||[]).slice(0,2), 'SPA', '網路購物'])];
+  const testPerf = estimateFromHistory(testHistKeys);
+  const test = {
+    name: buildAudienceName('all', testInts.length?testInts:['SPA','健身和保健'], '廣泛'),
+    priority:'測試受眾', cls:'test',
+    ageMin:Math.max(18, mainAgeMin-3), ageMax:Math.min(65, mainAgeMax+5), gender:'all',
+    interests:testInts.length ? testInts.slice(0,8) : ['SPA','健身和保健','網路購物','自我照護'],
+    placements:placements,
+    perf:testPerf,
+    reasoning:buildReasoning(r,'test',testInts,testPerf),
+    copy:buildCopy(r,'test'),
+    histKeys:testHistKeys,
+  };
 
-  const expInts=buildExpandInterests(r);
-  const expGender=mainGender==='all'?'all':(mainGender==='male'?'male':'female');
-  const expand={ name:buildExpandName(r), priority:'擴展受眾', cls:'expand', ageMin:Math.max(18,mainAgeMin-5), ageMax:Math.min(65,mainAgeMax-5), gender:expGender, interests:expInts, behaviors:['科技產品早期採用者','網購重度使用者'], placements:[...placements,'Audience Network'].slice(0,3), perf:estimatePerformance(4), reasoning:buildReasoning(r,'expand',expInts), copy:buildCopy(r,'expand') };
+  // === Expand audience ===
+  const expInts = buildExpandInterests(r);
+  const expHistKeys = buildExpandHistKeys(r);
+  const expGender = mainGender==='all'?'all':(mainGender==='male'?'male':'female');
+  const expPerf = estimateFromHistory(expHistKeys);
+  const expand = {
+    name: buildExpandName(r),
+    priority:'擴展受眾', cls:'expand',
+    ageMin:Math.max(18, mainAgeMin-5), ageMax:Math.min(65, mainAgeMax-5),
+    gender:expGender,
+    interests:expInts.slice(0,6),
+    placements:[...placements,'Audience Network'].slice(0,3),
+    perf:expPerf,
+    reasoning:buildReasoning(r,'expand',expInts,expPerf),
+    copy:buildCopy(r,'expand'),
+    histKeys:expHistKeys,
+  };
 
-  return [main,test,expand];
+  return [main, test, expand];
 }
 
 // ===== RENDER =====
+function renderInterestTag(key) {
+  const meta = resolveInterest(key);
+  if (meta) {
+    // Check if this interest has historical ROAS data
+    let roasClass = '';
+    for (const [hk, hv] of Object.entries(HISTORICAL_PERF)) {
+      if (key.includes(hk) || hk.includes(key)) {
+        roasClass = hv.roas >= 4 ? ' has-roas' : '';
+        break;
+      }
+    }
+    return `<span class="interest-tag${roasClass}">${meta.name.replace(/（.*）/,'')}<span class="meta-id">ID: ${meta.id} | 受眾: ${(meta.size/1e6).toFixed(1)}M</span></span>`;
+  }
+  return `<span class="interest-tag">${key}</span>`;
+}
+
+function renderHistBox(perf) {
+  if (!perf.histMatches || perf.histMatches.length === 0) return '';
+  let h = `<div class="historical-box"><strong>📈 歷史數據參考：</strong><br>`;
+  for (const m of perf.histMatches.slice(0,3)) {
+    const roasColor = m.roas >= 5 ? 'good' : m.roas >= 3 ? 'ok' : 'bad';
+    const cpaColor = m.cpa <= 600 ? 'good' : m.cpa <= 900 ? 'ok' : 'bad';
+    h += `${m.label}：<span class="hist-metric ${roasColor}">ROAS ${m.roas}</span><span class="hist-metric ${cpaColor}">CPA $${m.cpa}</span>（花費 $${(m.spend/1000).toFixed(0)}K, ${m.purchases} 筆轉換）<br>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
+function renderApiTargeting(audiences) {
+  // Generate Meta API targeting spec for the main audience
+  const a = audiences[0];
+  const ids = [];
+  for (const key of a.interests) {
+    const meta = resolveInterest(key);
+    if (meta) ids.push({id:meta.id, name:meta.name});
+  }
+  if (ids.length === 0) return '';
+
+  const targeting = {
+    age_min: a.ageMin,
+    age_max: a.ageMax,
+    genders: a.gender==='male'?[1]:a.gender==='female'?[2]:[],
+    geo_locations: {countries:["TW"]},
+    flexible_spec: [{interests: ids}],
+    publisher_platforms: a.placements.map(p=>{
+      if (p.includes('Instagram')) return 'instagram';
+      if (p.includes('Facebook')) return 'facebook';
+      if (p.includes('Audience')) return 'audience_network';
+      return 'facebook';
+    }).filter((v,i,a)=>a.indexOf(v)===i),
+  };
+
+  let h = `<div class="api-copy-section"><h3>🔧 Meta API 受眾設定（主力受眾）</h3>`;
+  h += `<p style="font-size:12.5px;color:var(--text-light);margin-bottom:10px;">可直接複製到 Meta Ads Manager 或 API 使用，興趣 ID 皆為 Meta 官方 ID</p>`;
+  h += `<div class="api-code" id="apiCode"><button class="copy-btn" onclick="copyApi()">複製</button>${JSON.stringify(targeting, null, 2)}</div></div>`;
+  return h;
+}
+
 function renderResults(r, audiences) {
-  const hasAudio=r.voiceover&&r.voiceover.length>5&&r.voiceover!=='無法判斷';
-  let h='';
+  const hasAudio = r.voiceover && r.voiceover.length>5 && r.voiceover!=='無法判斷';
+  let h = '';
 
-  h+=`<div class="section-title">📊 素材內容分析</div>`;
-  h+=`<div class="summary-card"><h3>內容標籤</h3><div class="tags">`;
-  if (r.productCategory) h+=`<span class="tag tag-product">🏷 ${r.productCategory}</span>`;
-  if (r.videoType) h+=`<span class="tag tag-style">🎬 ${r.videoType}</span>`;
-  if (r.coreAppeal) h+=`<span class="tag tag-emotion">💡 ${r.coreAppeal}</span>`;
-  if (r.scene) h+=`<span class="tag tag-scene">📍 ${r.scene}</span>`;
-  if (hasAudio) h+=`<span class="tag tag-audio">🔊 有音訊分析</span>`;
-  if (r.hasPeople&&r.hasPeople.includes('有')) h+=`<span class="tag tag-people">👤 ${r.gender||''}${r.ageRange?' '+r.ageRange:''}</span>`;
-  h+=`</div>`;
-  h+=`<div class="summary-grid">`;
-  if (r.visualTone) h+=`<div class="summary-item"><div class="label">視覺色調</div><div class="value">${r.visualTone}</div></div>`;
-  if (r.pace) h+=`<div class="summary-item"><div class="label">節奏</div><div class="value">${r.pace}</div></div>`;
-  if (r.bgMusic) h+=`<div class="summary-item"><div class="label">背景音樂</div><div class="value">${r.bgMusic}</div></div>`;
-  if (r.speakTone) h+=`<div class="summary-item"><div class="label">口說語氣</div><div class="value">${r.speakTone}</div></div>`;
-  if (r.priceInfo&&r.priceInfo!=='未提及') h+=`<div class="summary-item"><div class="label">價格</div><div class="value">${r.priceInfo}</div></div>`;
-  if (r.cta) h+=`<div class="summary-item"><div class="label">CTA</div><div class="value">${r.cta}</div></div>`;
-  h+=`</div>`;
-  if (hasAudio) h+=`<div class="audio-box"><strong>🎙 口說內容摘要：</strong>${r.voiceover.substring(0,200)}${r.voiceover.length>200?'...':''}</div>`;
-  if (r.mostLikelyPerson) h+=`<div class="target-box"><strong>🎯 最可能打動：</strong>${r.mostLikelyPerson}</div>`;
-  h+=`</div>`;
+  // Summary
+  h += `<div class="section-title">📊 素材內容分析</div>`;
+  h += `<div class="summary-card"><h3>內容標籤</h3><div class="tags">`;
+  if (r.productCategory) h += `<span class="tag tag-product">🏷 ${r.productCategory}</span>`;
+  if (r.videoType) h += `<span class="tag tag-style">🎬 ${r.videoType}</span>`;
+  if (r.coreAppeal) h += `<span class="tag tag-emotion">💡 ${r.coreAppeal}</span>`;
+  if (r.scene) h += `<span class="tag tag-scene">📍 ${r.scene}</span>`;
+  if (hasAudio) h += `<span class="tag tag-audio">🔊 有音訊分析</span>`;
+  if (r.hasPeople&&r.hasPeople.includes('有')) h += `<span class="tag tag-people">👤 ${r.gender||''}${r.ageRange?' '+r.ageRange:''}</span>`;
+  h += `<span class="tag tag-data">📈 含歷史 ROAS 數據</span>`;
+  h += `</div>`;
+  h += `<div class="summary-grid">`;
+  if (r.visualTone) h += `<div class="summary-item"><div class="label">視覺色調</div><div class="value">${r.visualTone}</div></div>`;
+  if (r.pace) h += `<div class="summary-item"><div class="label">節奏</div><div class="value">${r.pace}</div></div>`;
+  if (r.bgMusic) h += `<div class="summary-item"><div class="label">背景音樂</div><div class="value">${r.bgMusic}</div></div>`;
+  if (r.speakTone) h += `<div class="summary-item"><div class="label">口說語氣</div><div class="value">${r.speakTone}</div></div>`;
+  if (r.priceInfo&&r.priceInfo!=='未提及') h += `<div class="summary-item"><div class="label">價格</div><div class="value">${r.priceInfo}</div></div>`;
+  if (r.cta) h += `<div class="summary-item"><div class="label">CTA</div><div class="value">${r.cta}</div></div>`;
+  h += `</div>`;
+  if (hasAudio) h += `<div class="audio-box"><strong>🎙 口說內容摘要：</strong>${r.voiceover.substring(0,200)}${r.voiceover.length>200?'...':''}</div>`;
+  if (r.mostLikelyPerson) h += `<div class="target-box"><strong>🎯 最可能打動：</strong>${r.mostLikelyPerson}</div>`;
+  h += `</div>`;
 
-  h+=`<div class="section-title">🎯 推薦受眾設定</div>`;
+  // Audience cards
+  h += `<div class="section-title">🎯 推薦受眾設定</div>`;
   for (const a of audiences) {
-    const gTxt=a.gender==='male'?'男性為主':a.gender==='female'?'女性為主':'不限性別';
-    const aL=((a.ageMin-18)/47*100).toFixed(0), aW=((a.ageMax-a.ageMin)/47*100).toFixed(0);
-    h+=`<div class="audience-card priority-${a.cls}">`;
-    h+=`<div class="audience-header"><div class="audience-name">${a.name}</div><span class="priority-badge ${a.cls}">${a.priority}</span></div>`;
-    h+=`<div class="audience-details">`;
-    h+=`<div class="detail-group"><div class="detail-label">年齡範圍</div><div class="detail-value">${a.ageMin} - ${a.ageMax} 歲</div><div class="age-bar"><div class="fill" style="left:${aL}%;width:${aW}%"></div></div><div class="age-labels"><span>18</span><span>35</span><span>50</span><span>65</span></div></div>`;
-    h+=`<div class="detail-group"><div class="detail-label">性別</div><div class="detail-value">${gTxt}</div></div></div>`;
-    h+=`<div class="detail-group"><div class="detail-label">興趣標籤</div><div class="interest-tags">${a.interests.map(i=>`<span class="interest-tag">${i}</span>`).join('')}</div></div>`;
-    h+=`<div style="margin-top:10px" class="detail-group"><div class="detail-label">建議版位</div><div class="placement-tags">${a.placements.map(p=>`<span class="placement-tag">${p}</span>`).join('')}</div></div>`;
-    h+=`<div class="conversion-indicator"><div class="conv-dot ${a.perf.en}"></div><span class="conv-text ${a.perf.en}">轉換潛力：${a.perf.level}</span></div>`;
-    h+=`<div class="budget-row"><div class="budget-item">💰 建議日預算：<strong>NT$ ${a.perf.budget}</strong></div><div class="budget-item">📊 預估 CPA：<strong>NT$ ${a.perf.cpa}</strong></div></div>`;
-    h+=`<div class="reasoning">${a.reasoning}</div>`;
-    h+=`<div class="copy-suggestion">✏️ 建議文案方向：「${a.copy}」</div></div>`;
+    const gTxt = a.gender==='male'?'男性為主':a.gender==='female'?'女性為主':'不限性別';
+    const aL = ((a.ageMin-18)/47*100).toFixed(0), aW = ((a.ageMax-a.ageMin)/47*100).toFixed(0);
+    h += `<div class="audience-card priority-${a.cls}">`;
+    h += `<div class="audience-header"><div class="audience-name">${a.name}</div><span class="priority-badge ${a.cls}">${a.priority}</span></div>`;
+    h += `<div class="audience-details">`;
+    h += `<div class="detail-group"><div class="detail-label">年齡範圍</div><div class="detail-value">${a.ageMin} - ${a.ageMax} 歲</div><div class="age-bar"><div class="fill" style="left:${aL}%;width:${aW}%"></div></div><div class="age-labels"><span>18</span><span>35</span><span>50</span><span>65</span></div></div>`;
+    h += `<div class="detail-group"><div class="detail-label">性別</div><div class="detail-value">${gTxt}</div></div></div>`;
+    h += `<div class="detail-group"><div class="detail-label">興趣標籤（hover 查看 Meta ID）</div><div class="interest-tags">${a.interests.map(i=>renderInterestTag(i)).join('')}</div></div>`;
+    h += `<div style="margin-top:10px" class="detail-group"><div class="detail-label">建議版位</div><div class="placement-tags">${a.placements.map(p=>`<span class="placement-tag">${p}</span>`).join('')}</div></div>`;
+    h += `<div class="conversion-indicator"><div class="conv-dot ${a.perf.en}"></div><span class="conv-text ${a.perf.en}">轉換潛力：${a.perf.level}</span></div>`;
+    h += `<div class="budget-row"><div class="budget-item">💰 建議日預算：<strong>NT$ ${a.perf.budget}</strong></div><div class="budget-item">📊 預估 CPA：<strong>NT$ ${a.perf.cpa}</strong></div><div class="budget-item">📈 預估 ROAS：<strong>${a.perf.roas}</strong></div></div>`;
+    h += renderHistBox(a.perf);
+    h += `<div class="reasoning">${a.reasoning}</div>`;
+    h += `<div class="copy-suggestion">✏️ 建議文案方向：「${a.copy}」</div></div>`;
   }
 
-  h+=`<div class="section-title">💡 投放策略建議</div>`;
-  h+=`<div class="strategy-card"><h3>整體策略</h3><p>以「${audiences[0].name}」為主力投放，搭配「${audiences[1].name}」進行 A/B 測試。`;
-  if (hasAudio) h+=`此素材有口說內容，建議優先投放有聲音的版位（Reels、動態消息），避免純展示型版位。`;
-  h+=`建議先以主力受眾跑 3-5 天收集數據，再根據 CTR 和 CPA 決定是否擴展到測試受眾。</p></div>`;
-  h+=`<div class="strategy-card"><h3>A/B 測試建議</h3><p>(1) <strong>受眾測試</strong>：主力 vs 測試受眾，觀察 CTR 和 CPA 差異<br>(2) <strong>版位測試</strong>：${audiences[0].placements[0]||'IG Reels'} vs ${audiences[0].placements[1]||'FB Feed'}<br>(3) <strong>文案測試</strong>：功能訴求 vs 情境訴求</p></div>`;
-  if (r.qualityNotes&&r.qualityNotes.length>2) h+=`<div class="strategy-card"><h3>⚠️ 素材品質備註</h3><p>${r.qualityNotes}</p></div>`;
-  h+=`<div class="disclaimer">預估數據為基於 3ZeBra 品牌歷史經驗的參考值，實際表現取決於投放時段、競價環境、產品頁轉換率等因素</div>`;
+  // API targeting spec
+  h += `<div class="section-title">🔧 API 受眾設定</div>`;
+  h += renderApiTargeting(audiences);
+
+  // Strategy
+  h += `<div class="section-title">💡 投放策略建議</div>`;
+  h += `<div class="strategy-card"><h3>整體策略</h3><p>以「${audiences[0].name}」為主力投放，搭配「${audiences[1].name}」進行 A/B 測試。`;
+  if (hasAudio) h += `此素材有口說內容，建議優先投放有聲音的版位（Reels、動態消息），避免純展示型版位。`;
+  const topHist = audiences[0].perf.histMatches[0];
+  if (topHist) h += `<br><br>歷史數據顯示，最接近此素材的受眾「${topHist.label}」ROAS 為 ${topHist.roas}，CPA 為 $${topHist.cpa}。建議以此為基準設定出價策略。`;
+  h += `<br><br>建議先以主力受眾跑 3-5 天收集數據，再根據 CTR 和 CPA 決定是否擴展到測試受眾。</p></div>`;
+  h += `<div class="strategy-card"><h3>A/B 測試建議</h3><p>(1) <strong>受眾測試</strong>：主力 vs 測試受眾，觀察 CTR 和 CPA 差異<br>(2) <strong>版位測試</strong>：${audiences[0].placements[0]||'IG Reels'} vs ${audiences[0].placements[1]||'FB Feed'}<br>(3) <strong>文案測試</strong>：功能訴求 vs 情境訴求</p></div>`;
+  if (r.qualityNotes&&r.qualityNotes.length>2) h += `<div class="strategy-card"><h3>⚠️ 素材品質備註</h3><p>${r.qualityNotes}</p></div>`;
+  h += `<div class="disclaimer">預估數據來自 3ZeBra 近 12 個月實際投放數據（已排除 DPA/DABA/RT/ASC），共 NT$7,796,464 花費、7,935 筆轉換，整體 ROAS 2.62。實際表現取決於投放時段、競價環境、產品頁轉換率等因素。</div>`;
   return h;
+}
+
+// ===== COPY API =====
+function copyApi() {
+  const code = document.getElementById('apiCode');
+  const text = code.innerText.replace('複製','').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = code.querySelector('.copy-btn');
+    btn.textContent='已複製!';
+    setTimeout(()=>{btn.textContent='複製';},2000);
+  });
 }
 
 // ===== MAIN =====
 function analyze() {
-  const text=document.getElementById('reportInput').value.trim();
-  const err=document.getElementById('errorMsg'), load=document.getElementById('loading'), res=document.getElementById('results');
+  const text = document.getElementById('reportInput').value.trim();
+  const err = document.getElementById('errorMsg'), load = document.getElementById('loading'), res = document.getElementById('results');
   err.className='error-msg'; res.className='results';
   if (!text) { err.textContent='⚠️ 請先貼上 Gemini Gem 的素材分析報告'; err.className='error-msg show'; return; }
   if (text.length<80) { err.textContent='⚠️ 報告內容太短，請確認是完整的 Gemini 分析報告'; err.className='error-msg show'; return; }
@@ -832,15 +1276,15 @@ function analyze() {
   document.getElementById('step3chip').classList.add('active');
   setTimeout(()=>{
     try {
-      const parsed=parseReport(text);
-      const audiences=generateAudiences(parsed);
-      res.innerHTML=renderResults(parsed,audiences);
-      res.className='results show';
-      res.scrollIntoView({behavior:'smooth',block:'start'});
+      const parsed = parseReport(text);
+      const audiences = generateAudiences(parsed);
+      res.innerHTML = renderResults(parsed, audiences);
+      res.className = 'results show';
+      res.scrollIntoView({behavior:'smooth', block:'start'});
     } catch(e) { err.textContent='⚠️ 分析錯誤：'+e.message; err.className='error-msg show'; }
     load.className='loading';
     document.getElementById('analyzeBtn').disabled=false;
-  },800);
+  },1000);
 }
 
 function clearAll() {
